@@ -1,0 +1,208 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        :root {
+            --background-color: #7a255e;
+            --game-color: #f9f9f9;
+
+            --space-size: 4rem;
+        }
+        body {
+            margin: 0;
+            background-color: var(--background-color);
+            font-family: 'Roboto', sans-serif;
+        }
+        .game-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .game {
+            background-color: var(--game-color);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .game-text {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+        }
+        .game-space {
+            border: 0.2rem solid #000;
+            border-radius: 0.5rem;
+            width: var(--space-size);
+            height: var(--space-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--space-size);
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0.2rem;
+        }
+        .x {
+            color: #c45555;
+        }
+        .o {
+            color: #5560c4;
+        }
+
+        .restart-button {
+            background-color: #47963f;
+            color: #fff;
+            border: 0.2rem solid #fff;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            font-size: 2rem;
+            cursor: pointer;
+            width: 100%;
+            display: none;
+        }
+    </style>
+    <script>
+        var gameBoard = ["", "", "", "", "", "", "", "", ""];
+
+        var gameState = "xTurn";
+
+        function updateGameState() {
+            var gameText = document.getElementById("gameText");
+            if (gameState === "xTurn") {
+                gameText.innerHTML = "X's Turn";
+            } else if (gameState === "oTurn") {
+                gameText.innerHTML = "O's Turn";
+            } else if (gameState === "xWin") {
+                gameText.innerHTML = "X Wins!";
+                var restartButton = document.getElementById("restartButton");
+                restartButton.style.display = "inline-block";
+            } else if (gameState === "oWin") {
+                gameText.innerHTML = "O Wins!";
+                var restartButton = document.getElementById("restartButton");
+                restartButton.style.display = "inline-block";
+            } else if (gameState === "tie") {
+                gameText.innerHTML = "Tie!";
+                var restartButton = document.getElementById("restartButton");
+                restartButton.style.display = "inline-block";
+            }
+        }
+
+        function restart() {
+            gameBoard = ["", "", "", "", "", "", "", "", ""];
+            gameState = "xTurn";
+            updateGameState();
+            var gameSpaces = document.getElementsByClassName("game-space");
+            for (var i = 0; i < gameSpaces.length; i++) {
+                gameSpaces[i].innerHTML = "";
+            }
+            var restartButton = document.getElementById("restartButton");
+            restartButton.style.display = "none";
+        }
+
+        function updateGameBoard() {
+            var win = false;
+            const winCombinations = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+
+            for (var i = 0; i < winCombinations.length; i++) {
+                var combination = winCombinations[i];
+                if (gameBoard[combination[0]] === gameBoard[combination[1]] && gameBoard[combination[1]] === gameBoard[combination[2]] && gameBoard[combination[0]] !== "") {
+                    win = gameBoard[combination[0]];
+                    break;
+                }
+            }
+
+            if(win !== false) {
+                if (win === "X") {
+                    gameState = "xWin";
+                } else if (win === "O") {
+                    gameState = "oWin";
+                }
+
+                updateGameState();
+            }
+
+            var tie = true;
+            for (var i = 0; i < gameBoard.length; i++) {
+                if (gameBoard[i] === "") {
+                    tie = false;
+                    break;
+                }
+            }
+
+            if (tie) {
+                gameState = "tie";
+                
+                updateGameState();
+            }
+
+            for(var i = 0; i < gameBoard.length; i++) {
+                var space = document.getElementById("gameSpace" + i);
+                if(gameBoard[i] === "X") {
+                    space.innerHTML = "<span class='x'>X</span>";
+                } else if(gameBoard[i] === "O") {
+                    space.innerHTML = "<span class='o'>O</span>";
+                } else {
+                    space.innerHTML = "";
+                }
+            }
+        }
+
+        window.onload = function() {
+            updateGameBoard();
+            updateGameState();
+        }
+
+        function clickSpace(space) {
+            if(gameState === "xTurn") {
+                gameBoard[space] = "X";
+                gameState = "oTurn";
+            } else if(gameState === "oTurn") {
+                gameBoard[space] = "O";
+                gameState = "xTurn";
+            }
+            updateGameBoard();
+            updateGameState();
+        }
+    </script>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game">
+            <span class="game-text" id="gameText"></span>
+            <div class="game-board">
+                <div class="game-space" id="gameSpace0" onclick="clickSpace(0)"></div>
+                <div class="game-space" id="gameSpace1" onclick="clickSpace(1)"></div>
+                <div class="game-space" id="gameSpace2" onclick="clickSpace(2)"></div>
+                <div class="game-space" id="gameSpace3" onclick="clickSpace(3)"></div>
+                <div class="game-space" id="gameSpace4" onclick="clickSpace(4)"></div>
+                <div class="game-space" id="gameSpace5" onclick="clickSpace(5)"></div>
+                <div class="game-space" id="gameSpace6" onclick="clickSpace(6)"></div>
+                <div class="game-space" id="gameSpace7" onclick="clickSpace(7)"></div>
+                <div class="game-space" id="gameSpace8" onclick="clickSpace(8)"></div>
+            </div>
+            <button onclick="restart()" class="restart-button" id="restartButton">Restart</button>
+        </div>
+    </div>
+</body>
+</html>
