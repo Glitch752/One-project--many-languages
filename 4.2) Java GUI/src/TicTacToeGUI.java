@@ -10,9 +10,16 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.GridBagConstraints;
 
+enum GameState {
+	X_TURN, O_TURN, X_WON, O_WON, DRAW
+}
+
 public class TicTacToeGUI {
+	static GameState gameState;
 
 	public static void main(String[] args) {
+		gameState = GameState.X_TURN;
+
 		JFrame frame = new JFrame("Tic Tac Toe");
 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -40,20 +47,9 @@ public class TicTacToeGUI {
 		c.weightx = 1;
 		c.weighty = 1;
 
-		int buttonPadding = 10;
+		JLabel label = new JLabel("");
 
-		for (int i = 0; i < 9; i++) {
-			JButton button = new JButton("");
-
-			c.gridx = i % 3;
-			c.gridy = i / 3;
-
-			c.insets = new Insets(buttonPadding, buttonPadding, buttonPadding, buttonPadding);
-
-			buttonPanel.add(button, c);
-			
-			button.addActionListener(new ButtonListener(i));
-		}
+		updateButtons(buttonPanel, label, c, 10);
 
 		frame.setLayout(new GridBagLayout());
 
@@ -64,7 +60,8 @@ public class TicTacToeGUI {
 
 		c.insets = new Insets(10, 0, 10, 0);
 
-		JLabel label = new JLabel("Tic Tac Toe");
+		updateLabel(label, gameState);
+
 		label.setFont(label.getFont().deriveFont(24.0f));
 		label.setHorizontalAlignment(JLabel.CENTER);
 
@@ -81,16 +78,66 @@ public class TicTacToeGUI {
 
 		frame.setVisible(true);
 	}
+
+	public static void updateLabel(JLabel label, GameState gameState) {
+		switch (gameState) {
+			case X_TURN:
+				label.setText("X's turn");
+				break;
+			case O_TURN:
+				label.setText("O's turn");
+				break;
+			case X_WON:
+				label.setText("X wins!");
+				break;
+			case O_WON:
+				label.setText("O wins!");
+				break;
+			case DRAW:
+				label.setText("Draw!");
+				break;
+		}
+	}
+
+	public static void updateButtons(JPanel buttonPanel, JLabel label, GridBagConstraints c, int buttonPadding) {
+		for (int i = 0; i < 9; i++) {
+			JButton button = new JButton("");
+
+			c.gridx = i % 3;
+			c.gridy = i / 3;
+
+			c.insets = new Insets(buttonPadding, buttonPadding, buttonPadding, buttonPadding);
+
+			buttonPanel.add(button, c);
+			
+			button.addActionListener(new ButtonListener(i, label));
+		}
+	}
 }
 
 class ButtonListener implements java.awt.event.ActionListener {
 	private int buttonNumber;
+	private JLabel label;
 
-	public ButtonListener(int buttonNumber) {
+	public ButtonListener(int buttonNumber, JLabel label) {
 		this.buttonNumber = buttonNumber;
+		this.label = label;
 	}
 
 	public void actionPerformed(java.awt.event.ActionEvent e) {
 		System.out.println("Button " + buttonNumber + " was clicked.");
+
+		switch(TicTacToeGUI.gameState) {
+			case X_TURN:
+				TicTacToeGUI.gameState = GameState.O_TURN;
+				break;
+			case O_TURN:
+				TicTacToeGUI.gameState = GameState.X_TURN;
+				break;
+			default:
+				break;
+		}
+
+		TicTacToeGUI.updateLabel(label, TicTacToeGUI.gameState);
 	}
 }
