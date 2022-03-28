@@ -16,6 +16,8 @@ enum GameState {
 
 public class TicTacToeGUI {
 	static GameState gameState;
+	static String[] board = { " ", " ", " ", " ", " ", " ", " ", " ", " " };
+	static int buttonPadding = 10;
 
 	public static void main(String[] args) {
 		gameState = GameState.X_TURN;
@@ -49,7 +51,7 @@ public class TicTacToeGUI {
 
 		JLabel label = new JLabel("");
 
-		updateButtons(buttonPanel, label, c, 10);
+		updateButtons(buttonPanel, label, c, buttonPadding, board);
 
 		frame.setLayout(new GridBagLayout());
 
@@ -99,9 +101,14 @@ public class TicTacToeGUI {
 		}
 	}
 
-	public static void updateButtons(JPanel buttonPanel, JLabel label, GridBagConstraints c, int buttonPadding) {
+	public static void updateButtons(JPanel buttonPanel, JLabel label, GridBagConstraints c, int buttonPadding, String[] board) {
+		buttonPanel.removeAll();
+
 		for (int i = 0; i < 9; i++) {
-			JButton button = new JButton("");
+			JButton button = new JButton();
+
+			button.setFont(button.getFont().deriveFont(48.0f));
+			button.setText(board[i]);
 
 			c.gridx = i % 3;
 			c.gridy = i / 3;
@@ -110,18 +117,23 @@ public class TicTacToeGUI {
 
 			buttonPanel.add(button, c);
 			
-			button.addActionListener(new ButtonListener(i, label));
+			button.addActionListener(new ButtonListener(i, label, buttonPanel));
 		}
+
+		buttonPanel.revalidate();
+		buttonPanel.repaint();
 	}
 }
 
 class ButtonListener implements java.awt.event.ActionListener {
 	private int buttonNumber;
 	private JLabel label;
+	private JPanel buttonPanel;
 
-	public ButtonListener(int buttonNumber, JLabel label) {
+	public ButtonListener(int buttonNumber, JLabel label, JPanel buttonPanel) {
 		this.buttonNumber = buttonNumber;
 		this.label = label;
+		this.buttonPanel = buttonPanel;
 	}
 
 	public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -138,6 +150,16 @@ class ButtonListener implements java.awt.event.ActionListener {
 				break;
 		}
 
+		TicTacToeGUI.board[buttonNumber] = TicTacToeGUI.gameState == GameState.X_TURN ? "X" : "O";
+
 		TicTacToeGUI.updateLabel(label, TicTacToeGUI.gameState);
+
+		GridBagConstraints c = new GridBagConstraints();
+
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1;
+		c.weighty = 1;
+
+		TicTacToeGUI.updateButtons(buttonPanel, label, c, TicTacToeGUI.buttonPadding, TicTacToeGUI.board);
 	}
 }
