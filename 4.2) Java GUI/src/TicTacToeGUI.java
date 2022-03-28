@@ -19,25 +19,39 @@ public class TicTacToeGUI {
 	static String[] board = { " ", " ", " ", " ", " ", " ", " ", " ", " " };
 	static int buttonPadding = 10;
 
+	static Boolean frameCreated = false;
+
+	static JFrame frame;
+
 	public static void main(String[] args) {
+		for(int i = 0; i < board.length; i++) {
+			board[i] = " ";
+		}
+
 		gameState = GameState.X_TURN;
 
-		JFrame frame = new JFrame("Tic Tac Toe");
+		if(!frameCreated) {
+			frameCreated = true;
 
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame = new JFrame("Tic Tac Toe");
 
-		int windowWidth = 500;
-		int windowHeight = 544;
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		frame.setSize(windowWidth, windowHeight);
+			int windowWidth = 500;
+			int windowHeight = 544;
 
-		frame.setResizable(false);
+			frame.setSize(windowWidth, windowHeight);
 
-		// Move to center of screen
-		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		frame.setLocation(dim.width / 2 - windowWidth / 2, dim.height / 2 - windowHeight / 2);
+			frame.setResizable(false);
 
-		frame.requestFocus();
+			// Move to center of screen
+			Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+			frame.setLocation(dim.width / 2 - windowWidth / 2, dim.height / 2 - windowHeight / 2);
+
+			frame.requestFocus();
+		}
+
+		frame.getContentPane().removeAll();
 
 		// Add the 9 buttons to the frame
 		JPanel buttonPanel = new JPanel();
@@ -90,13 +104,13 @@ public class TicTacToeGUI {
 				label.setText("O's turn");
 				break;
 			case X_WON:
-				label.setText("X wins!");
+				label.setText("X wins! Click to restart.");
 				break;
 			case O_WON:
-				label.setText("O wins!");
+				label.setText("O wins! Click to restart.");
 				break;
 			case DRAW:
-				label.setText("Draw!");
+				label.setText("Draw! Click to restart.");
 				break;
 		}
 	}
@@ -123,6 +137,32 @@ public class TicTacToeGUI {
 		buttonPanel.revalidate();
 		buttonPanel.repaint();
 	}
+
+	public static void checkForWin(String[] board, JLabel label) {
+		int[][] winCombos = { { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 0, 3, 6 }, { 1, 4, 7 }, { 2, 5, 8 }, { 0, 4, 8 }, { 2, 4, 6 } };
+
+		for (int[] winCombo : winCombos) {
+			if (board[winCombo[0]] != " " && board[winCombo[0]] == board[winCombo[1]] && board[winCombo[0]] == board[winCombo[2]]) {
+				if (board[winCombo[0]] == "X") {
+					gameState = GameState.X_WON;
+				} else {
+					gameState = GameState.O_WON;
+				}
+			}
+		}
+
+		if (gameState != GameState.X_WON && gameState != GameState.O_WON) {
+			for (int i = 0; i < 9; i++) {
+				if (board[i] == " ") {
+					return;
+				}
+			}
+
+			gameState = GameState.DRAW;
+		}
+
+		updateLabel(label, gameState);
+	}
 }
 
 class ButtonListener implements java.awt.event.ActionListener {
@@ -137,8 +177,14 @@ class ButtonListener implements java.awt.event.ActionListener {
 	}
 
 	public void actionPerformed(java.awt.event.ActionEvent e) {
-		System.out.println("Button " + buttonNumber + " was clicked.");
 
+		if(TicTacToeGUI.gameState == GameState.X_WON || TicTacToeGUI.gameState == GameState.O_WON || TicTacToeGUI.gameState == GameState.DRAW) {
+			TicTacToeGUI.main(null);
+			return;
+		}
+
+		if(TicTacToeGUI.board[buttonNumber] != " ") return;
+		
 		switch(TicTacToeGUI.gameState) {
 			case X_TURN:
 				TicTacToeGUI.gameState = GameState.O_TURN;
@@ -147,12 +193,10 @@ class ButtonListener implements java.awt.event.ActionListener {
 				TicTacToeGUI.gameState = GameState.X_TURN;
 				break;
 			default:
-				break;
+				return;
 		}
 
-		TicTacToeGUI.board[buttonNumber] = TicTacToeGUI.gameState == GameState.X_TURN ? "X" : "O";
-
-		TicTacToeGUI.updateLabel(label, TicTacToeGUI.gameState);
+		TicTacToeGUI.board[buttonNumber] = TicTacToeGUI.gameState == GameState.O_TURN ? "X" : "O";
 
 		GridBagConstraints c = new GridBagConstraints();
 
@@ -161,5 +205,9 @@ class ButtonListener implements java.awt.event.ActionListener {
 		c.weighty = 1;
 
 		TicTacToeGUI.updateButtons(buttonPanel, label, c, TicTacToeGUI.buttonPadding, TicTacToeGUI.board);
+
+		TicTacToeGUI.checkForWin(TicTacToeGUI.board, label);
+
+		TicTacToeGUI.updateLabel(label, TicTacToeGUI.gameState);
 	}
 }
