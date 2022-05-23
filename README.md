@@ -9,3 +9,4 @@ This repository is where I'm creating Tic-Tac-Toe in as many languages as possib
 1) Java
 1) Lua
 1) Go
+1) Julia
